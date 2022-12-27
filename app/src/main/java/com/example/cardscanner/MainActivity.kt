@@ -2,6 +2,7 @@ package com.example.cardscanner
 
 import android.app.Activity
 import android.app.PendingIntent
+import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
@@ -84,6 +85,24 @@ class MainActivity : AppCompatActivity() {
             )
         } catch (e: IntentSender.SendIntentException) {
             throw RuntimeException("Failed to start payment card recognition.", e)
+        }
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            PAYMENT_CARD_RECOGNITION_REQUEST_CODE -> {
+                possiblyShowPaymentCardOcrButton()
+                when (resultCode) {
+                    RESULT_OK -> data?.let { intent ->
+                        PaymentCardRecognitionResult.getFromIntent(intent)
+                            ?.let(::handlePaymentCardRecognitionSuccess)
+                    }
+                    RESULT_CANCELED -> {
+                        // The user cancelled the scan card attempt
+                    }
+                }
+            }
         }
     }
 
